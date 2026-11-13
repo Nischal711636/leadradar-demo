@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cold Email Agent — Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23f97316'/><text x='50' y='72' font-size='60' text-anchor='middle' fill='white'>✉</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fafaf9;
+  --bg2: #ffffff;
+  --bg3: #f5f5f4;
+  --border: #e7e5e4;
+  --text: #1c1917;
+  --muted: #78716c;
+  --accent: #f97316;
+  --accent-deep: #ea580c;
+  --accent-soft: #fef3e7;
+  --accent2: #f97316;
+  --good: #15803d;  --good-soft: #f0fdf4;
+  --warn: #b45309;  --warn-soft: #fffbeb;
+  --bad: #dc2626;   --bad-soft: #fef2f2;
+  --radius: 14px;
+  --ring: 0 0 0 1px rgba(231, 229, 228, .8);
+  font-size: 15px;
+}
+* { box-sizing: border-box; margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+a { color: var(--accent); }
+
+.logo-chip {
+  width: 38px; height: 38px; border-radius: 11px; background: var(--accent);
+  display: flex; align-items: center; justify-content: center; flex: none;
+  color: #fff;
+}
+.icon { width: 16px; height: 16px; vertical-align: -3px; }
+
+header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 26px; border-bottom: 1px solid var(--border);
+  background: var(--bg2); position: sticky; top: 0; z-index: 10;
+  flex-wrap: wrap;
+}
+header h1 { font-size: 1.08rem; font-weight: 700; letter-spacing: -.01em; }
+header .sub { color: var(--muted); font-size: .78rem; font-weight: 400; }
+.badge {
+  padding: 4px 12px; border-radius: 99px; font-size: .72rem; font-weight: 600;
+  letter-spacing: .03em;
+}
+.badge.dry { background: var(--warn-soft); color: var(--warn); border: 1px solid #fde68a; }
+.badge.live { background: var(--good-soft); color: var(--good); border: 1px solid #bbf7d0; }
+
+nav { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+nav button {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: none; border: none; color: var(--muted);
+  padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: .86rem;
+  font-weight: 500; font-family: inherit;
+}
+nav button .icon { width: 15px; height: 15px; }
+nav button:hover { color: var(--text); background: var(--bg3); }
+nav button.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+
+main { padding: 26px 26px 70px; max-width: 1280px; margin: 0 auto; }
+section.page { display: none; }
+section.page.visible { display: block; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.card {
+  background: var(--bg2); border: none; box-shadow: var(--ring); border-radius: var(--radius);
+  padding: 17px 19px;
+}
+.card .num { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; }
+.card .lbl { color: var(--muted); font-size: .78rem; margin-top: 3px; }
+.card.hl .num { color: var(--accent); }
+
+.panel {
+  background: var(--bg2); border: none; box-shadow: var(--ring); border-radius: var(--radius);
+  padding: 24px; margin-bottom: 18px;
+}
+.panel h2 {
+  font-size: .72rem; margin-bottom: 16px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--muted);
+}
+.panel h2 .hint { color: #a8a29e; font-weight: 400; font-size: .74rem; margin-left: 8px; text-transform: none; letter-spacing: 0; }
+
+button.btn {
+  background: var(--accent); color: #fff; font-weight: 600; border: none;
+  padding: 9px 18px; border-radius: 10px; cursor: pointer; font-size: .85rem;
+  font-family: inherit; box-shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.08);
+}
+button.btn:hover { background: var(--accent-deep); }
+button.btn:disabled { opacity: .45; cursor: not-allowed; }
+button.btn.secondary { background: var(--bg2); color: var(--text); border: none; box-shadow: var(--ring); font-weight: 500; }
+button.btn.secondary:hover { background: var(--bg3); }
+button.btn.danger { background: var(--bg2); color: var(--bad); border: none; box-shadow: 0 0 0 1px #fecaca; }
+button.btn.danger:hover { background: var(--bad-soft); }
+button.btn.small { padding: 5px 12px; font-size: .75rem; box-shadow: none; }
+button.btn.small:not(.secondary):not(.danger) { box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+input, select, textarea {
+  background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 10px; padding: 8px 12px; font-size: .85rem; font-family: inherit;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+textarea { width: 100%; resize: vertical; line-height: 1.5; }
+label.field { display: block; margin-bottom: 10px; }
+label.field span { display: block; color: var(--muted); font-size: .75rem; margin-bottom: 4px; }
+label.field input, label.field select { width: 100%; }
+
+.pipeline { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
+.pipe-step {
+  flex: 1; min-width: 200px; background: var(--bg2); border: none; box-shadow: var(--ring);
+  border-radius: var(--radius); padding: 17px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.pipe-step .t { font-weight: 600; font-size: .92rem; display: flex; align-items: center; gap: 9px; }
+.pipe-step .t .n {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 27px; height: 27px; border-radius: 9px; flex: none;
+  background: var(--accent-soft); color: var(--accent); font-size: .8rem; font-weight: 700;
+}
+.pipe-step .d { color: var(--muted); font-size: .76rem; flex: 1; line-height: 1.5; }
+
+.hero {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffffff 70%);
+  box-shadow: var(--ring); border-radius: var(--radius);
+  padding: 22px 26px; margin-bottom: 18px;
+}
+.hero .hero-icon {
+  width: 52px; height: 52px; border-radius: 15px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: #fff; font-size: 1.5rem;
+}
+.hero .hero-text { flex: 1; min-width: 220px; }
+.hero .hero-eyebrow { font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+.hero .hero-title { font-size: 1.18rem; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; }
+.hero .hero-sub { color: var(--muted); font-size: .82rem; margin-top: 4px; }
+.hero .btn { padding: 12px 22px; font-size: .9rem; white-space: nowrap; }
+
+.funnel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 920px) { .funnel { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .funnel { grid-template-columns: 1fr; } }
+.stage {
+  position: relative; background: var(--bg2); box-shadow: var(--ring);
+  border-radius: var(--radius); padding: 18px 18px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.stage:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.07), var(--ring); }
+.stage .stage-head { display: flex; align-items: center; gap: 8px; }
+.stage .stage-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 8px; flex: none;
+  background: var(--accent-soft); color: var(--accent); font-size: .72rem; font-weight: 700;
+}
+.stage .stage-name { font-size: .8rem; font-weight: 600; color: var(--muted); }
+.stage .stage-num { font-size: 2rem; font-weight: 700; letter-spacing: -.02em; line-height: 1; margin: 6px 0 2px; }
+.stage .stage-conv { font-size: .72rem; color: #a8a29e; min-height: 1em; }
+.stage .stage-bar { height: 4px; border-radius: 99px; background: var(--bg3); overflow: hidden; margin: 8px 0 12px; }
+.stage .stage-bar > span { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .5s ease; }
+.stage .btn { width: 100%; justify-content: center; }
+.stage .stage-action { margin-top: auto; display: flex; gap: 8px; align-items: center; }
+.stage .stage-action .btn { flex: 1; }
+.stage.done .stage-badge { background: var(--good-soft); color: var(--good); }
+.stage.active { box-shadow: 0 0 0 2px var(--accent); }
+.stage.active .stage-name { color: var(--accent); }
+.stage::after {
+  content: "→"; position: absolute; right: -12px; top: 50%; transform: translateY(-50%);
+  color: #d6d3d1; font-size: 1.1rem; z-index: 1;
+}
+.stage:last-child::after { display: none; }
+@media (max-width: 920px) { .stage::after { display: none; } }
+
+.ministats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.ministat {
+  display: flex; align-items: baseline; gap: 7px; padding: 8px 14px;
+  background: var(--bg2); box-shadow: var(--ring); border-radius: 10px; font-size: .8rem;
+}
+.ministat b { font-size: .95rem; font-weight: 700; }
+.ministat .lbl { color: var(--muted); }
+.ministat.accent b { color: var(--accent); }
+.ministat.good b { color: var(--good); }
+.spinner {
+  display: inline-block; width: 12px; height: 12px; border: 2px solid #fff;
+  border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite;
+  vertical-align: -2px; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+tr:hover td { background: var(--bg); }
+.biz-row { cursor: pointer; }
+.biz-caret { color: var(--accent); font-size: .7rem; display: inline-block; width: 10px; }
+.biz-detail { display: none; }
+.biz-detail.open { display: table-row; }
+.biz-detail td { background: var(--bg) !important; padding: 0 10px 14px 44px; }
+.biz-detail-inner { font-size: .8rem; line-height: 1.6; }
+.biz-why { color: var(--text); margin-bottom: 6px; }
+.why-label {
+  display: inline-block; background: var(--accent-soft); color: var(--accent-deep);
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  padding: 1px 7px; border-radius: 5px; margin-right: 6px;
+}
+.biz-meta { display: flex; flex-wrap: wrap; gap: 16px; color: var(--muted); }
+.biz-meta a { color: var(--accent); }
+
+.score { display: inline-block; min-width: 34px; text-align: center; padding: 3px 8px; border-radius: 7px; font-weight: 700; font-size: .78rem; }
+.score.s-top { background: var(--accent); color: #fff; }
+.score.s-hi  { background: var(--accent-soft); color: var(--accent-deep); }
+.score.s-mid { background: var(--bg3); color: #57534e; }
+.score.s-lo  { background: var(--bg3); color: #a8a29e; }
+
+.chip { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: .72rem; background: var(--bg3); border: 1px solid var(--border); color: var(--muted); }
+.chip.st-sent { background: var(--good-soft); color: var(--good); border-color: #bbf7d0; }
+.chip.st-queued { background: var(--accent-soft); color: var(--accent); border-color: #fed7aa; }
+.chip.st-skipped, .chip.st-opted_out { background: var(--bad-soft); color: var(--bad); border-color: #fecaca; }
+
+.regions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.region {
+  display: flex; align-items: center; gap: 9px; padding: 10px 13px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; user-select: none; font-size: .84rem; font-weight: 500;
+}
+.region:hover { border-color: #fdba74; }
+.region.on { border-color: #fdba74; background: var(--accent-soft); }
+.region .meta { margin-left: auto; color: var(--muted); font-size: .7rem; text-align: right; }
+.region input { accent-color: var(--accent); }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 980px) { .split { grid-template-columns: 1fr; } }
+
+.preview-mail {
+  background: var(--bg2); color: var(--text); border-radius: 8px; padding: 18px 20px;
+  font-family: Georgia, "Times New Roman", serif; font-size: .9rem; line-height: 1.55;
+  white-space: pre-wrap; border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+}
+.preview-meta { font-size: .78rem; color: var(--muted); margin-bottom: 8px; line-height: 1.6; }
+.preview-meta b { color: var(--text); }
+
+.queue-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; background: var(--bg2); }
+.queue-head { display: flex; align-items: center; gap: 12px; padding: 11px 14px; cursor: pointer; }
+.queue-head:hover { background: var(--bg); border-radius: var(--radius); }
+.queue-head .qsubj { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.queue-head .subj { font-weight: 600; font-size: .86rem; }
+.queue-head .to { color: var(--muted); font-size: .76rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.queue-body { display: none; padding: 0 14px 14px; }
+.queue-item.open .queue-body { display: block; }
+.queue-actions { display: flex; gap: 8px; margin-left: auto; }
+
+.activity-item { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: .8rem; }
+.activity-item:last-child { border-bottom: none; }
+.activity-item .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; align-self: center; }
+.activity-item .ts { color: var(--muted); white-space: nowrap; font-size: .72rem; }
+.activity-item .kind { min-width: 62px; font-weight: 600; font-size: .72rem; }
+
+.toast {
+  position: fixed; bottom: 22px; right: 22px; background: var(--text);
+  border: none; color: #fff; padding: 12px 18px;
+  border-radius: 10px; font-size: .85rem; opacity: 0; transition: opacity .3s;
+  pointer-events: none; z-index: 99; max-width: 380px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+}
+.toast.show { opacity: 1; }
+.muted { color: var(--muted); }
+.token-help { font-size: .74rem; color: var(--muted); line-height: 1.8; }
+.token-help code { background: var(--bg3); padding: 1px 6px; border-radius: 5px; cursor: pointer; }
+.token-help code:hover { color: var(--accent); background: var(--accent-soft); }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.empty { color: var(--muted); text-align: center; padding: 36px 20px; font-size: .85rem; line-height: 1.7; }
+.empty .btn { margin-top: 12px; }
+.empty-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 15px; margin: 0 auto 12px;
+  background: var(--accent-soft); color: var(--accent); font-size: 1.4rem;
+}
+.empty b { color: var(--text); font-weight: 600; }
+
+.nav-badge {
+  display: inline-block; min-width: 18px; padding: 1px 5px; margin-left: 6px;
+  background: var(--accent); color: #fff; border-radius: 99px;
+  font-size: .68rem; font-weight: 700; text-align: center; vertical-align: 1px;
+}
+
+.pipe-step .stat { font-size: .74rem; color: var(--accent); font-weight: 600; min-height: 1.1em; }
+
+details.collapse { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg2); margin-bottom: 18px; }
+details.collapse summary {
+  cursor: pointer; padding: 14px 20px; font-size: .9rem; font-weight: 600;
+  list-style: none; user-select: none;
+}
+details.collapse summary::before { content: "▸ "; color: var(--accent); }
+details.collapse[open] summary::before { content: "▾ "; }
+details.collapse .inner { padding: 0 20px 18px; }
+
+.savebar {
+  position: sticky; bottom: 14px; z-index: 5;
+  display: flex; justify-content: flex-end; margin-top: 8px;
+}
+.savebar .btn { box-shadow: 0 4px 14px rgba(0,0,0,.16); padding: 11px 22px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-chip">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+  </div>
+  <div>
+    <h1>Cold Email Agent</h1>
+    <div class="sub">New Tech Computer Services · Dwarka, New Delhi</div>
+  </div>
+  <span id="modeBadge" class="badge dry">DRY-RUN</span>
+  <nav id="nav">
+    <button data-page="dashboard" class="active">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      Dashboard</button>
+    <button data-page="businesses">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+      Businesses</button>
+    <button data-page="message">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Message</button>
+    <button data-page="queue">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+      Queue<span class="nav-badge" id="queueBadge" style="display:none">12</span></button>
+    <button data-page="settings">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="7" x2="14" y2="7"/><line x1="10" y1="7" x2="3" y2="7"/><line x1="21" y1="17" x2="12" y2="17"/><line x1="8" y1="17" x2="3" y2="17"/><circle cx="12" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      Settings</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="page visible" id="page-dashboard">
+  <div class="hero">
+    <div class="hero-icon">📨</div>
+    <div class="hero-text">
+      <div class="hero-eyebrow">Next step</div>
+      <div class="hero-title">38 drafts waiting for your review</div>
+      <div class="hero-sub">You're in safe DRY-RUN — approving won't send for real yet.</div>
+    </div>
+    <button class="btn" onclick="showPage('queue')">Review drafts →</button>
+  </div>
+
+  <div class="funnel">
+    <div class="stage active">
+      <div class="stage-head"><span class="stage-badge">1</span><span class="stage-name">Discovered</span></div>
+      <div class="stage-num">6,645</div>
+      <div class="stage-conv">businesses on the map</div>
+      <div class="stage-bar"><span style="width:100%"></span></div>
+      <div class="stage-action"><button class="btn secondary">Scan regions</button></div>
+    </div>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-badge">2</span><span class="stage-name">Reachable</span></div>
+      <div class="stage-num">2,847</div>
+      <div class="stage-conv">43% had an email</div>
+      <div class="stage-bar"><span style="width:43%"></span></div>
+      <div class="stage-action"><button class="btn secondary">Find emails</button></div>
+    </div>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-badge">3</span><span class="stage-name">Drafted</span></div>
+      <div class="stage-num">238</div>
+      <div class="stage-conv">8% of reachable drafted</div>
+      <div class="stage-bar"><span style="width:8%"></span></div>
+      <div class="stage-action"><button class="btn secondary">Draft</button><label class="muted" style="font-size:.72rem; white-space:nowrap">≥<input type="number" value="60" min="0" max="100" style="width:48px; padding:5px 6px"></label></div>
+    </div>
+    <div class="stage done">
+      <div class="stage-head"><span class="stage-badge">4</span><span class="stage-name">Sent</span></div>
+      <div class="stage-num">7</div>
+      <div class="stage-conv">3% of drafts sent</div>
+      <div class="stage-bar"><span style="width:3%"></span></div>
+      <div class="stage-action"><button class="btn secondary" onclick="showPage('queue')">Open queue</button></div>
+    </div>
+  </div>
+
+  <div class="ministats">
+    <div class="ministat accent"><b>38</b><span class="lbl">in flight (approved)</span></div>
+    <div class="ministat good"><b>7</b><span class="lbl">sent for real</span></div>
+    <div class="ministat"><b>3</b><span class="lbl">sent today</span></div>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <h2>Regions <span class="hint">tick what to scan</span></h2>
+      <div style="border-radius:10px; background:var(--accent-soft); padding:10px 14px; font-size:.82rem; margin-bottom:12px"><b>7</b> of 30 selected</div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap:8px;">
+        <label class="region on"><input type="checkbox" checked><span>Dwarka</span></label>
+        <label class="region on"><input type="checkbox" checked><span>Janakpuri</span></label>
+        <label class="region on"><input type="checkbox" checked><span>Palam</span></label>
+        <label class="region"><input type="checkbox"><span>Karol Bagh</span></label>
+        <label class="region"><input type="checkbox"><span>Nehru Place</span></label>
+        <label class="region"><input type="checkbox"><span>Gurgaon</span></label>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Live activity</h2>
+      <div class="activity-item">
+        <span class="dot" style="background:#15803d"></span>
+        <span class="ts">just now</span>
+        <span class="kind" style="color:#15803d">send</span>
+        <span>Sent to info@caservices.in: "Tally, backups, and one less worry…"</span>
+      </div>
+      <div class="activity-item">
+        <span class="dot" style="background:#f97316"></span>
+        <span class="ts">2m ago</span>
+        <span class="kind" style="color:#f97316">enrich</span>
+        <span>Delhi Coaching Centre → contact@delhi-coaching.in</span>
+      </div>
+      <div class="activity-item">
+        <span class="dot" style="background:#78716c"></span>
+        <span class="ts">5m ago</span>
+        <span class="kind" style="color:#78716c">discover</span>
+        <span>Dwarka: 1200 businesses found, 287 new</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BUSINESSES ============ -->
+<section class="page" id="page-businesses">
+  <div class="panel">
+    <h2>Businesses <span class="hint">2,847 shown</span></h2>
+    <div class="filters">
+      <input placeholder="🔍 Search name / category / area" style="width:230px">
+      <select><option>All states</option></select>
+      <select><option value="">Email: any</option><option value="1">Has email</option></select>
+      <select><option value="">Status: any</option><option>sent</option></select>
+      <label class="muted" style="font-size:.76rem">score ≥ <input type="number" style="width:60px" min="0" max="100"></label>
+      <button class="btn secondary small">Clear</button>
+    </div>
+    <div style="overflow-x:auto"><table>
+      <tr><th>Score</th><th>Name</th><th>Category</th><th>Area</th><th>Email</th><th>Status</th><th></th></tr>
+      <tr class="biz-row" onclick="this.nextElementSibling.classList.toggle('open')">
+        <td><span class="score s-top">92</span></td>
+        <td><span class="biz-caret">▸</span> <b>Sharma & Associates</b></td>
+        <td>CA / Accounting firm</td>
+        <td>Dwarka<div class="muted" style="font-size:.7rem">Delhi</div></td>
+        <td>info@sharmaCA.in</td>
+        <td><span class="chip st-queued">queued</span></td>
+        <td><button class="btn secondary small">skip</button></td>
+      </tr>
+      <tr class="biz-detail" style="display:table-row">
+        <td colspan="7">
+          <div class="biz-detail-inner">
+            <div class="biz-why"><span class="why-label">Why this lead</span> Runs Tally + critical financial data; backup, AMC and original software are easy sells; has email on record</div>
+            <div class="biz-meta">
+              <span>📞 98765 43210</span>
+              <span>🌐 <a href="#">sharmaCA.in</a></span>
+              <span>📍 Sector 11, Dwarka</span>
+              <span>✉️ info@sharmaCA.in</span>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr class="biz-row" onclick="this.nextElementSibling.classList.toggle('open')">
+        <td><span class="score s-hi">84</span></td>
+        <td><span class="biz-caret">▸</span> <b>Delhi Smart Classes Institute</b></td>
+        <td>Coaching centre</td>
+        <td>Janakpuri<div class="muted" style="font-size:.7rem">Delhi</div></td>
+        <td>director@delhismart.edu</td>
+        <td><span class="chip st-queued">queued</span></td>
+        <td><button class="btn secondary small">skip</button></td>
+      </tr>
+      <tr class="biz-detail">
+        <td colspan="7">
+          <div class="biz-detail-inner">
+            <div class="biz-why"><span class="why-label">Why this lead</span> Computer labs and admin PCs take a beating; downtime mid-batch is very visible; has email on record</div>
+            <div class="biz-meta">
+              <span>📞 98712 34567</span>
+              <span>🌐 <a href="#">delhismart.edu</a></span>
+              <span>📍 Janakpuri, Delhi</span>
+              <span>✉️ director@delhismart.edu</span>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============ MESSAGE ============ -->
+<section class="page" id="page-message">
+  <div class="split">
+    <div class="panel">
+      <h2>Message template <span class="hint">this is the layout every mail is built from</span></h2>
+      <label class="field"><span>Subject</span>
+        <input value="{{subject_line}}" style="width:100%">
+      </label>
+      <label class="field"><span>Body</span>
+        <textarea rows="16">{{opener}}
+
+{{hook}}
+
+I'm {{sender_name}} from {{shop_name}} in Sector 11 Dwarka — we've been keeping Delhi's computers alive for 20+ years. For a {{category_lc}} like yours we handle {{services_line}}.
+
+You can see what we do at {{website}}. Reach me at {{phone}}.
+
+Warm regards,
+{{sender_name}}
+{{shop_name}}</textarea>
+      </label>
+      <button class="btn">Save template</button>
+      <button class="btn secondary">Reset to default</button>
+    </div>
+    <div class="panel">
+      <h2>Live preview</h2>
+      <div class="preview-meta"><b>To:</b> info@sharmaCA.in &nbsp;·&nbsp; <b>Subject:</b> Before filing season tests Sharma's PCs</div>
+      <div class="preview-mail">Namaste from a fellow Dwarka business — I'll keep this short, because I know you have better things to do than read long emails.
+
+Every filing season, we get panicked calls from CA offices where the one PC holding Tally and three years of client data decided it was the perfect week to die. The sad part? A backup plan and a yearly service would have made it a non-event.
+
+I'm Rajesh from New Tech Computer Services in Sector 11 Dwarka — we've been keeping Delhi's computers alive for 20+ years. For a CA firm like yours we handle annual maintenance (AMC), Tally setup & customisation, automatic data backup, original software licences, and same-day repairs.
+
+You can see what we do at newtech-laptopsmith.com. Reach me at 98765 43210.
+
+Warm regards,
+Rajesh
+New Tech Computer Services</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUEUE ============ -->
+<section class="page" id="page-queue">
+  <div class="panel">
+    <h2>Drafts — waiting for your approval <span class="hint">12 waiting · ~1 day to clear at 25/day</span></h2>
+    <button class="btn">Approve all drafts</button>
+    <div style="margin-top:12px;">
+      <div class="queue-item">
+        <div class="queue-head" onclick="this.parentElement.classList.toggle('open')">
+          <span class="score s-top">89</span>
+          <span class="qsubj">
+            <span class="subj">Tally, backups, and one less worry for Sharma & Associates</span>
+            <span class="to">→ info@sharmaCA.in · Sharma & Associates · CA / Accounting firm</span>
+          </span>
+        </div>
+        <div class="queue-body" style="padding:0 14px 14px">
+          <label class="field"><span>Subject (edit freely, then Save)</span>
+            <input value="Tally, backups, and one less worry for Sharma & Associates" style="width:100%"></label>
+          <label class="field"><span>Body</span>
+            <textarea rows="12">Namaste from a fellow Dwarka business — I'll keep this short...
+
+Every filing season, we get panicked calls from CA offices...</textarea>
+          </label>
+          <button class="btn secondary small">💾 Save changes</button>
+        </div>
+      </div>
+      <div class="queue-item">
+        <div class="queue-head" onclick="this.parentElement.classList.toggle('open')">
+          <span class="score s-hi">84</span>
+          <span class="qsubj">
+            <span class="subj">Lab PC down mid-batch? Delhi Smart Classes, there's a better way</span>
+            <span class="to">→ director@delhismart.edu · Delhi Smart Classes · Coaching centre</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Approved — going out automatically</h2>
+    <div class="empty"><div class="empty-icon">🚀</div><b>26 emails in flight</b><br>Sending one at a time with 20–90s random gaps</div>
+  </div>
+
+  <div class="panel">
+    <h2>Sent</h2>
+    <div class="queue-item">
+      <div class="queue-head" onclick="this.parentElement.classList.toggle('open')">
+        <span class="chip st-sent">sent</span>
+        <span class="qsubj">
+          <span class="subj">Quick question about Delhi Coaching Centre's computers</span>
+          <span class="to">→ info@delhicoaching.com · Delhi Coaching Centre · Coaching centre</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section class="page" id="page-settings">
+  <div class="split">
+    <div class="panel">
+      <h2>Sending <span class="hint">stays in DRY-RUN until configured</span></h2>
+      <label class="field"><span>SMTP host</span><input value="smtp.gmail.com"></label>
+      <label class="field"><span>SMTP port</span><input value="587"></label>
+      <label class="field"><span>SMTP user (your Gmail)</span><input value="you@yourdomain.com"></label>
+      <label class="field"><span>SMTP password</span><input type="password" value="••••••••"></label>
+      <label class="field"><span>Dry run</span>
+        <select><option value="1" selected>1 — dry run (safe)</option><option value="0">0 — LIVE sending</option></select>
+      </label>
+      <label class="field"><span>Daily send cap</span><input type="number" value="25"></label>
+      <label class="field"><span>Gap between sends (seconds, min)</span><input type="number" value="20"></label>
+      <label class="field"><span>Gap between sends (seconds, max)</span><input type="number" value="90"></label>
+    </div>
+    <div class="panel">
+      <h2>Shop profile</h2>
+      <label class="field"><span>Shop name</span><input value="New Tech Computer Services"></label>
+      <label class="field"><span>Website</span><input value="newtech-laptopsmith.com"></label>
+      <label class="field"><span>Address</span><input value="Sector 11, Dwarka, New Delhi"></label>
+      <label class="field"><span>Phone</span><input value="98765 43210"></label>
+      <label class="field"><span>Reply-to email</span><input value="you@yourdomain.com"></label>
+      <label class="field"><span>Opening hours</span><input value="Mon-Sat 10am-8pm"></label>
+      <label class="field"><span>Sender name</span><input value="Rajesh"></label>
+    </div>
+  </div>
+  <div class="savebar"><button class="btn">Save all settings</button></div>
+</section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function showPage(name) {
+  document.querySelectorAll('section.page').forEach(s => s.classList.remove('visible'));
+  $('page-' + name).classList.add('visible');
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+}
+
+document.querySelectorAll('nav button[data-page]').forEach(b => b.onclick = () => showPage(b.dataset.page));
+
+let toastTimer;
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+document.addEventListener('click', e => {
+  if (e.target.tagName === 'CODE' && e.target.closest('.token-help')) {
+    navigator.clipboard.writeText(e.target.textContent);
+    toast('Copied ' + e.target.textContent);
+  }
+});
+</script>
+
+</body>
+</html>
